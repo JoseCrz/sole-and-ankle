@@ -1,9 +1,9 @@
-import React from 'react';
-import styled from 'styled-components/macro';
+import React from "react";
+import styled from "styled-components/macro";
 
-import { COLORS, WEIGHTS } from '../../constants';
-import { formatPrice, pluralize, isNewShoe } from '../../utils';
-import Spacer from '../Spacer';
+import { COLORS, WEIGHTS } from "../../constants";
+import { formatPrice, pluralize, isNewShoe } from "../../utils";
+import Spacer from "../Spacer";
 
 const ShoeCard = ({
   slug,
@@ -38,32 +38,91 @@ const ShoeCard = ({
           <Image alt="" src={imageSrc} />
         </ImageWrapper>
         <Spacer size={12} />
-        <Row>
-          <Name>{name}</Name>
-          <Price>{formatPrice(price)}</Price>
-        </Row>
-        <Row>
-          <ColorInfo>{pluralize('Color', numOfColors)}</ColorInfo>
-        </Row>
+        <ColumnWrapper>
+          <Column>
+            <Name>{name}</Name>
+            <ColorInfo>{pluralize("Color", numOfColors)}</ColorInfo>
+          </Column>
+          <Column>
+            {salePrice ? (
+              <>
+                <Price isOnSale>{formatPrice(price)}</Price>
+                <SalePrice>{formatPrice(salePrice)}</SalePrice>
+              </>
+            ) : (
+              <Price>{formatPrice(price)}</Price>
+            )}
+          </Column>
+        </ColumnWrapper>
+        <Flag variant={variant} />
       </Wrapper>
     </Link>
   );
 };
+
+const flagStyles = {
+  "new-release": {
+    flagBackground: COLORS.secondary,
+    flagText: "Just Released!",
+  },
+  "on-sale": {
+    flagBackground: COLORS.primary,
+    flagText: "Sale",
+  },
+  default: {},
+};
+
+function Flag({ variant = "default" }) {
+  if (variant === "default") return null;
+
+  const { flagBackground, flagText } = flagStyles[variant];
+
+  return (
+    <FlagBox
+      style={{
+        "--flag-background": flagBackground,
+      }}
+    >
+      {flagText}
+    </FlagBox>
+  );
+}
+
+const FlagBox = styled.div`
+  top: 12px;
+  right: -4px;
+  position: absolute;
+  padding: 8px 12px;
+  background-color: var(--flag-background);
+  font-weight: ${WEIGHTS.bold};
+  color: ${COLORS.white};
+  letter-spacing: 0.5px;
+  border-radius: 2px;
+`;
+
+const ColumnWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
 
 const Link = styled.a`
   text-decoration: none;
   color: inherit;
 `;
 
-const Wrapper = styled.article``;
+const Wrapper = styled.article`
+  position: relative;
+`;
 
 const ImageWrapper = styled.div`
   position: relative;
 `;
 
-const Image = styled.img``;
+const Image = styled.img`
+  width: 100%;
+`;
 
-const Row = styled.div`
+const Column = styled.div`
   font-size: 1rem;
 `;
 
@@ -72,7 +131,11 @@ const Name = styled.h3`
   color: ${COLORS.gray[900]};
 `;
 
-const Price = styled.span``;
+const Price = styled.span`
+  display: block;
+  text-decoration: ${(props) => props.isOnSale && "line-through"};
+  color: ${(props) => (props.isOnSale ? COLORS.gray[700] : "inherit")};
+`;
 
 const ColorInfo = styled.p`
   color: ${COLORS.gray[700]};
